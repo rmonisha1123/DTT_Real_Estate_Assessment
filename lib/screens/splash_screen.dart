@@ -1,4 +1,5 @@
 // lib/screens/splash_screen.dart
+import 'package:dtt_real_estate_assessment/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -32,8 +33,8 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     _bgAnimation = ColorTween(
-      begin: Color(0xFFB71C1C), // deep red
-      end: Color.fromARGB(255, 230, 85, 65), // lighter red
+      begin: AppColors.deepRed,
+      end: AppColors.primaryRed,
     ).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
