@@ -2,11 +2,15 @@
 <!-- Location Permissions -->
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+<uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:label="dtt_real_estate_assessment"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAQ1fPKkndzlGnaA5yRA8K6x5Jc9z4c47k"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

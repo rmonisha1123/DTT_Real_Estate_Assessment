@@ -11,7 +11,8 @@ class House {
   final int size;
   final double latitude;
   final double longitude;
-  final double? distance; // NEW
+  final double? distance;
+  final String? description;
 
   House({
     required this.id,
@@ -26,6 +27,7 @@ class House {
     required this.latitude,
     required this.longitude,
     this.distance,
+    this.description,
   });
 
   factory House.fromJson(Map<String, dynamic> json) {
@@ -42,6 +44,7 @@ class House {
       latitude: (json['latitude'] ?? 0).toDouble(),
       longitude: (json['longitude'] ?? 0).toDouble(),
       distance: null,
+      description: json['description'],
     );
   }
 
@@ -59,6 +62,7 @@ class House {
       latitude: latitude,
       longitude: longitude,
       distance: distance ?? this.distance,
+      description: description,
     );
   }
 
