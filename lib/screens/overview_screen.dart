@@ -6,7 +6,10 @@ import '../theme/app_theme.dart';
 import '../utils/location_helper.dart';
 import '../widgets/house_card.dart';
 import '../widgets/empty_state.dart';
+import '../widgets/house_card_shimmer.dart';
 import 'info_screen.dart';
+import 'detail_screen.dart';
+import 'wishlist_screen.dart';
 
 class OverviewScreen extends StatefulWidget {
   const OverviewScreen({super.key});
@@ -15,7 +18,8 @@ class OverviewScreen extends StatefulWidget {
   State<OverviewScreen> createState() => _OverviewScreenState();
 }
 
-class _OverviewScreenState extends State<OverviewScreen> {
+class _OverviewScreenState extends State<OverviewScreen>
+    with TickerProviderStateMixin {
   int _selectedIndex = 0;
   final ApiService api = ApiService();
   List<House> _houses = [];
@@ -24,10 +28,53 @@ class _OverviewScreenState extends State<OverviewScreen> {
   final TextEditingController _searchController = TextEditingController();
   Position? _userPosition;
 
+  late final AnimationController _transitionController;
+  late final Animation<Offset> _slideAnimation;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<double> _scaleAnimation;
+  late final Animation<Offset> _backgroundParallax;
+
   @override
   void initState() {
     super.initState();
     _initData();
+
+    // Main animation controller for transitions
+    _transitionController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0.15, 0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _transitionController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _fadeAnimation = CurvedAnimation(
+      parent: _transitionController,
+      curve: Curves.easeInOut,
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.98, end: 1.0).animate(
+      CurvedAnimation(parent: _transitionController, curve: Curves.easeOut),
+    );
+
+    // 👇 Parallax background animation
+    _backgroundParallax = Tween<Offset>(
+      begin: const Offset(0.05, 0), // subtle shift right
+      end: Offset.zero, // comes back to center
+    ).animate(
+      CurvedAnimation(parent: _transitionController, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _transitionController.dispose();
+    super.dispose();
   }
 
   Future<void> _initData() async {
@@ -66,6 +113,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
   Widget _buildOverviewPage() {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -83,17 +131,18 @@ class _OverviewScreenState extends State<OverviewScreen> {
               onChanged: _filterHouses,
               decoration: InputDecoration(
                 hintText: "Search for a home",
+                labelStyle: AppTextStyles.input,
                 hintStyle: AppTextStyles.hint,
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          _filterHouses("");
-                        },
-                      )
-                    : null,
+                suffixIcon: const Icon(Icons.search),
+                // suffixIcon: _searchController.text.isNotEmpty
+                //     ? IconButton(
+                //         icon: const Icon(Icons.clear),
+                //         onPressed: () {
+                //           _searchController.clear();
+                //           _filterHouses("");
+                //         },
+                //       )
+                //     : null,
                 filled: true,
                 fillColor: AppColors.lightGray,
                 border: OutlineInputBorder(
@@ -106,8 +155,9 @@ class _OverviewScreenState extends State<OverviewScreen> {
         ),
       ),
       body: _loading
-          ? Center(
-              child: CircularProgressIndicator(color: AppColors.primaryRed),
+          ? ListView.builder(
+              itemCount: 5, // number of shimmer placeholders
+              itemBuilder: (_, __) => const HouseCardShimmer(),
             )
           : _filteredHouses.isEmpty
               ? const EmptyState(
@@ -125,22 +175,83 @@ class _OverviewScreenState extends State<OverviewScreen> {
                             house.latitude,
                             house.longitude,
                           ) /
-                          1000; // convert meters → km
+                          1000;
                     }
 
-                    return HouseCard(
-                      house: house,
-                      distance: distanceKm,
+                    return GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(
+                        Navigator.push(
                           context,
-                          '/detail',
-                          arguments: house,
+                          PageRouteBuilder(
+                            transitionDuration:
+                                const Duration(milliseconds: 500),
+                            reverseTransitionDuration:
+                                const Duration(milliseconds: 400),
+                            pageBuilder: (_, animation, secondaryAnimation) =>
+                                DetailScreen(house: house),
+                            transitionsBuilder:
+                                (_, animation, secondaryAnimation, child) {
+                              // Combine fade + slide + scale
+                              final slideAnimation = Tween<Offset>(
+                                begin: const Offset(0.1, 0.05),
+                                end: Offset.zero,
+                              ).animate(
+                                CurvedAnimation(
+                                    parent: animation,
+                                    curve: Curves.easeOutCubic),
+                              );
+
+                              final fadeAnimation = CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.easeInOut,
+                              );
+
+                              final scaleAnimation = Tween<double>(
+                                begin: 0.96,
+                                end: 1.0,
+                              ).animate(
+                                CurvedAnimation(
+                                    parent: animation,
+                                    curve: Curves.easeOutBack),
+                              );
+
+                              return FadeTransition(
+                                opacity: fadeAnimation,
+                                child: SlideTransition(
+                                  position: slideAnimation,
+                                  child: ScaleTransition(
+                                    scale: scaleAnimation,
+                                    child: child,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                         );
                       },
+                      child: Hero(
+                        tag: 'house-image-${house.id}',
+                        child: HouseCard(
+                          house: house,
+                          distance: distanceKm,
+                        ),
+                      ),
                     );
                   },
                 ),
+    );
+  }
+
+  Widget _buildInfoPage() {
+    return SlideTransition(
+      position: _slideAnimation,
+      child: FadeTransition(
+        opacity: _fadeAnimation,
+        child: ScaleTransition(
+          scale: _scaleAnimation,
+          child: InfoScreen(),
+        ),
+      ),
     );
   }
 
@@ -148,21 +259,46 @@ class _OverviewScreenState extends State<OverviewScreen> {
   Widget build(BuildContext context) {
     final pages = [
       _buildOverviewPage(),
-      InfoScreen(),
+      _buildInfoPage(),
+      const WishlistScreen(),
     ];
 
     return Scaffold(
-      body: pages[_selectedIndex],
+      body: Stack(
+        children: [
+          SlideTransition(
+            position: _backgroundParallax,
+            child: Container(
+              color: _selectedIndex == 0 ? Colors.white : Colors.grey.shade100,
+            ),
+          ),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 450),
+            child: pages[_selectedIndex],
+          ),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         selectedItemColor: AppColors.primaryRed,
         unselectedItemColor: AppColors.textMedium,
         showSelectedLabels: false,
         showUnselectedLabels: false,
-        onTap: (index) => setState(() => _selectedIndex = index),
+        onTap: (index) {
+          if (index != _selectedIndex) {
+            if (index == 1 || index == 2) {
+              _transitionController.forward(from: 0);
+            } else {
+              _transitionController.reverse(from: 1);
+            }
+            setState(() => _selectedIndex = index);
+          }
+        },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
           BottomNavigationBarItem(icon: Icon(Icons.info_outline), label: ""),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.favorite_outline), label: ""),
         ],
       ),
     );
