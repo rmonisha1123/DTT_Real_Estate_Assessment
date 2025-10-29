@@ -37,17 +37,22 @@ class House {
       imagePath: json['image'] ?? '',
       price: double.tryParse(json['price'].toString()) ?? 0.0,
       city: json['city'] ?? '',
-      postalCode: json['postalCode'] ?? '',
+      postalCode: (json['zip'] ?? '')
+          .toString()
+          .replaceAll(' ', ''), // remove space like 1032KH
       bedrooms: json['bedrooms'] ?? 0,
       bathrooms: json['bathrooms'] ?? 0,
       size: json['size'] ?? 0,
       latitude: (json['latitude'] ?? 0).toDouble(),
       longitude: (json['longitude'] ?? 0).toDouble(),
-      distance: null,
+      distance: (json['distance'] != null)
+          ? double.tryParse(json['distance'].toString())
+          : null,
       description: json['description'],
     );
   }
 
+  // ✅ For copying existing house with a new distance
   House copyWith({double? distance}) {
     return House(
       id: id,
@@ -66,5 +71,28 @@ class House {
     );
   }
 
+  // ✅ For saving to SharedPreferences
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'image': imagePath,
+      'price': price,
+      'city': city,
+      'zip': postalCode,
+      'bedrooms': bedrooms,
+      'bathrooms': bathrooms,
+      'size': size,
+      'latitude': latitude,
+      'longitude': longitude,
+      'description': description,
+      'distance': distance,
+    };
+  }
+
+  // ✅ For restoring from SharedPreferences (alias for fromJson)
+  static House fromMap(Map<String, dynamic> map) => House.fromJson(map);
+
+  // ✅ Full image URL getter
   String get imageUrl => 'https://intern.d-tt.nl$imagePath';
 }
