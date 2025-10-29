@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:connectivity_plus/connectivity_plus.dart'; // 👈 Added for offline handling
 import '../models/house.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
@@ -25,9 +26,14 @@ class _OverviewScreenState extends State<OverviewScreen>
   List<House> _houses = [];
   List<House> _filteredHouses = [];
   bool _loading = true;
+  bool _isOffline = false; // 👈 Track internet status
+
   final TextEditingController _searchController = TextEditingController();
   Position? _userPosition;
 
+  late final Connectivity _connectivity;
+
+  // Animation controllers
   late final AnimationController _transitionController;
   late final Animation<Offset> _slideAnimation;
   late final Animation<double> _fadeAnimation;
@@ -37,6 +43,7 @@ class _OverviewScreenState extends State<OverviewScreen>
   @override
   void initState() {
     super.initState();
+    _initConnectivityListener(); // 👈 Start internet monitoring
     _initData();
 
     // Main animation controller for transitions
@@ -48,10 +55,12 @@ class _OverviewScreenState extends State<OverviewScreen>
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0.15, 0),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _transitionController,
-      curve: Curves.easeOutCubic,
-    ));
+    ).animate(
+      CurvedAnimation(
+        parent: _transitionController,
+        curve: Curves.easeOutCubic,
+      ),
+    );
 
     _fadeAnimation = CurvedAnimation(
       parent: _transitionController,
@@ -59,15 +68,21 @@ class _OverviewScreenState extends State<OverviewScreen>
     );
 
     _scaleAnimation = Tween<double>(begin: 0.98, end: 1.0).animate(
-      CurvedAnimation(parent: _transitionController, curve: Curves.easeOut),
+      CurvedAnimation(
+        parent: _transitionController,
+        curve: Curves.easeOut,
+      ),
     );
 
-    // 👇 Parallax background animation
+    // Parallax background animation
     _backgroundParallax = Tween<Offset>(
-      begin: const Offset(0.05, 0), // subtle shift right
-      end: Offset.zero, // comes back to center
+      begin: const Offset(0.05, 0),
+      end: Offset.zero,
     ).animate(
-      CurvedAnimation(parent: _transitionController, curve: Curves.easeOut),
+      CurvedAnimation(
+        parent: _transitionController,
+        curve: Curves.easeOut,
+      ),
     );
   }
 
@@ -77,6 +92,37 @@ class _OverviewScreenState extends State<OverviewScreen>
     super.dispose();
   }
 
+  /// 🔌 Connectivity listener setup
+  void _initConnectivityListener() {
+    _connectivity = Connectivity();
+    _connectivity.onConnectivityChanged.listen((status) {
+      final connected = status != ConnectivityResult.none;
+      if (!connected) {
+        setState(() => _isOffline = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("⚠️ No internet connection"),
+            backgroundColor: Colors.redAccent,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      } else {
+        if (_isOffline) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("✅ Back online — refreshing data..."),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+          _initData();
+        }
+        setState(() => _isOffline = false);
+      }
+    });
+  }
+
+  /// 🔁 Fetch data from API (when online)
   Future<void> _initData() async {
     setState(() => _loading = true);
 
@@ -91,27 +137,38 @@ class _OverviewScreenState extends State<OverviewScreen>
         _loading = false;
       });
     } catch (e) {
-      setState(() => _loading = false);
+      // If API fails (offline or other)
+      setState(() {
+        _loading = false;
+        _isOffline = true;
+      });
     }
   }
 
+  /// 🔍 Filter houses by search query
   void _filterHouses(String query) {
     query = query.toLowerCase().trim();
 
     setState(() {
-      if (query.isEmpty) {
-        _filteredHouses = _houses;
-      } else {
-        _filteredHouses = _houses.where((house) {
-          final cityMatch = house.city.toLowerCase().contains(query);
-          final postalMatch = house.postalCode.toLowerCase().contains(query);
-          return cityMatch || postalMatch;
-        }).toList();
-      }
+      _filteredHouses = query.isEmpty
+          ? _houses
+          : _houses.where((house) {
+              final cityMatch = house.city.toLowerCase().contains(query);
+              final postalMatch =
+                  house.postalCode.toLowerCase().contains(query);
+              return cityMatch || postalMatch;
+            }).toList();
     });
   }
 
+  /// 🏡 Overview Page (shows empty state when offline)
   Widget _buildOverviewPage() {
+    if (_isOffline) {
+      return const EmptyState(
+        message: "No internet connection.\nPlease reconnect to load data.",
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -134,15 +191,6 @@ class _OverviewScreenState extends State<OverviewScreen>
                 labelStyle: AppTextStyles.input,
                 hintStyle: AppTextStyles.hint,
                 suffixIcon: const Icon(Icons.search),
-                // suffixIcon: _searchController.text.isNotEmpty
-                //     ? IconButton(
-                //         icon: const Icon(Icons.clear),
-                //         onPressed: () {
-                //           _searchController.clear();
-                //           _filterHouses("");
-                //         },
-                //       )
-                //     : null,
                 filled: true,
                 fillColor: AppColors.lightGray,
                 border: OutlineInputBorder(
@@ -156,7 +204,7 @@ class _OverviewScreenState extends State<OverviewScreen>
       ),
       body: _loading
           ? ListView.builder(
-              itemCount: 5, // number of shimmer placeholders
+              itemCount: 5,
               itemBuilder: (_, __) => const HouseCardShimmer(),
             )
           : _filteredHouses.isEmpty
@@ -180,6 +228,7 @@ class _OverviewScreenState extends State<OverviewScreen>
 
                     return GestureDetector(
                       onTap: () {
+                        if (_isOffline) return;
                         Navigator.push(
                           context,
                           PageRouteBuilder(
@@ -187,18 +236,18 @@ class _OverviewScreenState extends State<OverviewScreen>
                                 const Duration(milliseconds: 500),
                             reverseTransitionDuration:
                                 const Duration(milliseconds: 400),
-                            pageBuilder: (_, animation, secondaryAnimation) =>
+                            pageBuilder: (_, animation, __) =>
                                 DetailScreen(house: house),
-                            transitionsBuilder:
-                                (_, animation, secondaryAnimation, child) {
+                            transitionsBuilder: (_, animation, __, child) {
                               // Combine fade + slide + scale
                               final slideAnimation = Tween<Offset>(
                                 begin: const Offset(0.1, 0.05),
                                 end: Offset.zero,
                               ).animate(
                                 CurvedAnimation(
-                                    parent: animation,
-                                    curve: Curves.easeOutCubic),
+                                  parent: animation,
+                                  curve: Curves.easeOutCubic,
+                                ),
                               );
 
                               final fadeAnimation = CurvedAnimation(
@@ -211,8 +260,9 @@ class _OverviewScreenState extends State<OverviewScreen>
                                 end: 1.0,
                               ).animate(
                                 CurvedAnimation(
-                                    parent: animation,
-                                    curve: Curves.easeOutBack),
+                                  parent: animation,
+                                  curve: Curves.easeOutBack,
+                                ),
                               );
 
                               return FadeTransition(
@@ -242,6 +292,7 @@ class _OverviewScreenState extends State<OverviewScreen>
     );
   }
 
+  /// ℹ️ Info Page (always available)
   Widget _buildInfoPage() {
     return SlideTransition(
       position: _slideAnimation,
@@ -260,7 +311,7 @@ class _OverviewScreenState extends State<OverviewScreen>
     final pages = [
       _buildOverviewPage(),
       _buildInfoPage(),
-      const WishlistScreen(),
+      if (!_isOffline) const WishlistScreen(), // 👈 Hide wishlist when offline
     ];
 
     return Scaffold(
@@ -285,6 +336,9 @@ class _OverviewScreenState extends State<OverviewScreen>
         showSelectedLabels: false,
         showUnselectedLabels: false,
         onTap: (index) {
+          // Prevent tapping wishlist if offline
+          if (_isOffline && index == 2) return;
+
           if (index != _selectedIndex) {
             if (index == 1 || index == 2) {
               _transitionController.forward(from: 0);
@@ -294,11 +348,20 @@ class _OverviewScreenState extends State<OverviewScreen>
             setState(() => _selectedIndex = index);
           }
         },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.info_outline), label: ""),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_outline), label: ""),
+        items: [
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: "",
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.info_outline),
+            label: "",
+          ),
+          if (!_isOffline)
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.favorite_outline),
+              label: "",
+            ),
         ],
       ),
     );
