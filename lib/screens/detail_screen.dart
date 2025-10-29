@@ -200,16 +200,20 @@ class _DetailScreenState extends State<DetailScreen> {
           Positioned(
             top: 40,
             left: 16,
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
-                  shape: BoxShape.circle,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5),
+                shape: BoxShape.circle,
+              ),
+              padding: const EdgeInsets.all(2),
+              child: IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: SvgPicture.asset(
+                  'assets/Icons/ic_back.svg',
+                  height: 22,
+                  // ignore: deprecated_member_use
+                  color: AppColors.white,
                 ),
-                padding: const EdgeInsets.all(8),
-                child:
-                    const Icon(Icons.arrow_back, color: Colors.white, size: 22),
               ),
             ),
           ),

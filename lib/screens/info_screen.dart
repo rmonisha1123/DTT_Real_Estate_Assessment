@@ -42,7 +42,7 @@ class InfoScreen extends StatelessWidget {
                       "assets/Images/dtt_banner/mdpi/dtt_banner.png",
                       height: 40,
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 25),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

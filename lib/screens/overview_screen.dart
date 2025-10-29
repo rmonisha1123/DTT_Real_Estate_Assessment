@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:connectivity_plus/connectivity_plus.dart'; // 👈 Added for offline handling
 import '../models/house.dart';
@@ -190,7 +191,16 @@ class _OverviewScreenState extends State<OverviewScreen>
                 hintText: "Search for a home",
                 labelStyle: AppTextStyles.input,
                 hintStyle: AppTextStyles.hint,
-                suffixIcon: const Icon(Icons.search),
+                suffixIcon: Padding(
+                  padding:
+                      const EdgeInsets.all(12.0), // Adjust padding as needed
+                  child: SvgPicture.asset(
+                    'assets/Icons/ic_search.svg',
+                    width: 20, // ✅ control width
+                    height: 20, // ✅ control height
+                    color: AppColors.textMedium,
+                  ),
+                ),
                 filled: true,
                 fillColor: AppColors.lightGray,
                 border: OutlineInputBorder(
@@ -349,12 +359,26 @@ class _OverviewScreenState extends State<OverviewScreen>
           }
         },
         items: [
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+          BottomNavigationBarItem(
+            icon: SvgPicture.asset(
+              'assets/Icons/ic_home.svg',
+              width: 20, // ✅ control width
+              height: 20, // ✅ control height
+              color: _selectedIndex == 0
+                  ? AppColors.primaryRed
+                  : AppColors.textMedium,
+            ),
             label: "",
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.info_outline),
+          BottomNavigationBarItem(
+            icon: SvgPicture.asset(
+              'assets/Icons/ic_info.svg',
+              width: 20, // ✅ control width
+              height: 20, // ✅ control height
+              color: _selectedIndex == 1
+                  ? AppColors.primaryRed
+                  : AppColors.textMedium,
+            ),
             label: "",
           ),
           if (!_isOffline)
