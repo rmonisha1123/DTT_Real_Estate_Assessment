@@ -14,13 +14,16 @@ class EmptyState extends StatelessWidget {
         children: [
           Image.asset(
             "assets/Images/search_state_empty.png", // add an illustration (from your assets)
-            width: 160,
+            width: 200,
           ),
           const SizedBox(height: 20),
           Text(
             message,
             style: AppTextStyles.body.copyWith(
-                color: AppColors.textMedium, fontWeight: FontWeight.w400),
+                color: AppColors.textMedium,
+                fontWeight: FontWeight.w100,
+                fontSize: 14),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
