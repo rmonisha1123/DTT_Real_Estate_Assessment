@@ -187,25 +187,35 @@ class _OverviewScreenState extends State<OverviewScreen>
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: TextField(
               controller: _searchController,
-              onChanged: _filterHouses,
+              onChanged: (value) {
+                _filterHouses(value);
+                setState(() {}); // 👈 To update UI when user types
+              },
               decoration: InputDecoration(
                 hintText: "Search for a home",
-                labelStyle:
-                    AppTextStyles.input.copyWith(fontWeight: FontWeight.w300),
-                hintStyle:
-                    AppTextStyles.hint.copyWith(fontWeight: FontWeight.w400),
-                suffixIcon: Padding(
-                  padding:
-                      const EdgeInsets.all(12.0), // Adjust padding as needed
-                  child: SvgPicture.asset(
-                    'assets/Icons/ic_search.svg',
-                    width: 20, // ✅ control width
-                    height: 20, // ✅ control height
-                    color: AppColors.textMedium,
-                  ),
-                ),
+                labelStyle: AppTextStyles.input,
+                hintStyle: AppTextStyles.hint,
                 filled: true,
                 fillColor: AppColors.lightGray,
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(Icons.clear, color: AppColors.textMedium),
+                        onPressed: () {
+                          _searchController.clear();
+                          _filterHouses("");
+                          setState(() {});
+                        },
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.all(
+                            12.0), // Adjust padding as needed
+                        child: SvgPicture.asset(
+                          'assets/Icons/ic_search.svg',
+                          width: 20, // ✅ control width
+                          height: 20, // ✅ control height
+                          color: AppColors.textMedium,
+                        ),
+                      ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -222,7 +232,7 @@ class _OverviewScreenState extends State<OverviewScreen>
             )
           : _filteredHouses.isEmpty
               ? const EmptyState(
-                  message: "No results found! Try another search.")
+                  message: "No results found!\nPerhaps try another search?")
               : ListView.builder(
                   itemCount: _filteredHouses.length,
                   itemBuilder: (context, index) {
