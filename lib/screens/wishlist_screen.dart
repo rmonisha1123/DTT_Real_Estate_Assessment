@@ -54,7 +54,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
         centerTitle: false,
         title: Text(
           "WISHLIST",
-          style: AppTextStyles.title01.copyWith(color: AppColors.textStrong),
+          style: AppTextStyles.title01.copyWith(
+              color: AppColors.textStrong, fontWeight: FontWeight.w700),
         ),
       ),
       body: _loading

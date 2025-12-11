@@ -178,7 +178,8 @@ class _OverviewScreenState extends State<OverviewScreen>
         centerTitle: false,
         title: Text(
           "DTT REAL ESTATE",
-          style: AppTextStyles.title01.copyWith(color: AppColors.textStrong),
+          style: AppTextStyles.title01.copyWith(
+              color: AppColors.textStrong, fontWeight: FontWeight.w700),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
@@ -189,8 +190,10 @@ class _OverviewScreenState extends State<OverviewScreen>
               onChanged: _filterHouses,
               decoration: InputDecoration(
                 hintText: "Search for a home",
-                labelStyle: AppTextStyles.input,
-                hintStyle: AppTextStyles.hint,
+                labelStyle:
+                    AppTextStyles.input.copyWith(fontWeight: FontWeight.w300),
+                hintStyle:
+                    AppTextStyles.hint.copyWith(fontWeight: FontWeight.w400),
                 suffixIcon: Padding(
                   padding:
                       const EdgeInsets.all(12.0), // Adjust padding as needed

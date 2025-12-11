@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/house.dart';
 import '../theme/app_theme.dart';
+import '../utils/price_formatter.dart';
 
 class HouseCard extends StatefulWidget {
   final House house;
@@ -117,12 +118,13 @@ class _HouseCardState extends State<HouseCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "\$${widget.house.price.toStringAsFixed(0)}",
+                      formatPrice(widget.house.price),
                       style: AppTextStyles.title02,
                     ),
                     Text(
                       "${widget.house.postalCode} ${widget.house.city}",
-                      style: AppTextStyles.body,
+                      style: AppTextStyles.body
+                          .copyWith(fontWeight: FontWeight.w400),
                     ),
                     const SizedBox(height: 25),
                     Row(
@@ -170,7 +172,8 @@ class _HouseCardState extends State<HouseCard> {
         const SizedBox(width: 4),
         Text(
           text,
-          style: AppTextStyles.detail.copyWith(color: AppColors.textMedium),
+          style: AppTextStyles.detail.copyWith(
+              color: AppColors.textMedium, fontWeight: FontWeight.w400),
         ),
       ],
     );

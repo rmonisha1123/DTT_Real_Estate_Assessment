@@ -15,7 +15,6 @@ class AppTextStyles {
   // Title 01 – Bold | 18dp
   static const TextStyle title01 = TextStyle(
     fontFamily: 'GothamSSm',
-    fontWeight: FontWeight.w700,
     fontSize: 18,
     color: AppColors.textStrong,
   );
@@ -23,7 +22,6 @@ class AppTextStyles {
   // Title 02 – Bold | 16dp
   static const TextStyle title02 = TextStyle(
     fontFamily: 'GothamSSm',
-    fontWeight: FontWeight.w700,
     fontSize: 16,
     color: AppColors.textStrong,
   );
@@ -31,7 +29,6 @@ class AppTextStyles {
   // Title 03 – Medium | 16dp
   static const TextStyle title03 = TextStyle(
     fontFamily: 'GothamSSm',
-    fontWeight: FontWeight.w500,
     fontSize: 16,
     color: AppColors.textMedium,
   );
@@ -39,7 +36,6 @@ class AppTextStyles {
   // Body – Book | 12dp
   static const TextStyle body = TextStyle(
     fontFamily: 'GothamSSm',
-    // fontWeight: FontWeight.w400,
     fontSize: 12,
     color: AppColors.textMedium,
   );
@@ -47,7 +43,6 @@ class AppTextStyles {
   // Input – Light | 12dp
   static const TextStyle input = TextStyle(
     fontFamily: 'GothamSSm',
-    fontWeight: FontWeight.w300,
     fontSize: 12,
     color: AppColors.textMedium,
   );
@@ -55,7 +50,6 @@ class AppTextStyles {
   // Hint – Book | 12dp
   static const TextStyle hint = TextStyle(
     fontFamily: 'GothamSSm',
-    fontWeight: FontWeight.w400,
     fontSize: 12,
     color: AppColors.textLight,
   );
@@ -63,7 +57,6 @@ class AppTextStyles {
   // Subtitle – Book | 10dp
   static const TextStyle subtitle = TextStyle(
     fontFamily: 'GothamSSm',
-    fontWeight: FontWeight.w400,
     fontSize: 10,
     color: AppColors.textMedium,
   );
@@ -71,7 +64,6 @@ class AppTextStyles {
   // Detail – Book | 12dp
   static const TextStyle detail = TextStyle(
     fontFamily: 'GothamSSm',
-    fontWeight: FontWeight.w400,
     fontSize: 12,
     color: AppColors.textLight,
   );
