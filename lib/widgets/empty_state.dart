@@ -19,7 +19,8 @@ class EmptyState extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             message,
-            style: AppTextStyles.body.copyWith(color: AppColors.textMedium),
+            style: AppTextStyles.body.copyWith(
+                color: AppColors.textMedium, fontWeight: FontWeight.w400),
           ),
         ],
       ),

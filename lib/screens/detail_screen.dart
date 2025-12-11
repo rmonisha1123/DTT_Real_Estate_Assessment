@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/house.dart';
 import '../theme/app_theme.dart';
 import '../utils/location_helper.dart';
+import '../utils/price_formatter.dart';
 
 class DetailScreen extends StatefulWidget {
   final House house;
@@ -119,7 +120,7 @@ class _DetailScreenState extends State<DetailScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "\$${widget.house.price.toStringAsFixed(0)}",
+                              formatPrice(widget.house.price),
                               style: AppTextStyles.title01,
                             ),
                             Row(
@@ -154,16 +155,21 @@ class _DetailScreenState extends State<DetailScreen> {
 
                         const SizedBox(height: 24),
 
-                        Text("Description", style: AppTextStyles.title02),
+                        Text("Description",
+                            style: AppTextStyles.title02
+                                .copyWith(fontWeight: FontWeight.w700)),
                         const SizedBox(height: 6),
                         Text(
                           widget.house.description ??
                               "No description available.",
-                          style: AppTextStyles.body,
+                          style: AppTextStyles.body
+                              .copyWith(fontWeight: FontWeight.w400),
                         ),
                         const SizedBox(height: 24),
 
-                        Text("Location", style: AppTextStyles.title02),
+                        Text("Location",
+                            style: AppTextStyles.title02
+                                .copyWith(fontWeight: FontWeight.w700)),
                         const SizedBox(height: 12),
 
                         ClipRRect(
@@ -238,7 +244,8 @@ class _DetailScreenState extends State<DetailScreen> {
         const SizedBox(width: 4),
         Text(
           text,
-          style: AppTextStyles.detail.copyWith(color: AppColors.textMedium),
+          style: AppTextStyles.detail.copyWith(
+              color: AppColors.textMedium, fontWeight: FontWeight.w400),
         ),
       ],
     );
