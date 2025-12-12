@@ -15,10 +15,10 @@ class InfoScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           "ABOUT",
-          style: AppTextStyles.title01
-              .copyWith(color: AppColors.white, fontWeight: FontWeight.w700),
+          style: AppTextStyles.title01.copyWith(
+              color: AppColors.textStrong, fontWeight: FontWeight.w500),
         ),
-        backgroundColor: AppColors.primaryRed,
+        backgroundColor: AppColors.white,
       ),
       body: Stack(
         children: [
@@ -29,14 +29,15 @@ class InfoScreen extends StatelessWidget {
               children: [
                 Text(
                   "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariature. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incidididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.",
-                  style:
-                      AppTextStyles.body.copyWith(fontWeight: FontWeight.w400),
+                  style: AppTextStyles.body.copyWith(
+                    fontWeight: FontWeight.w300,
+                  ),
                 ),
                 const SizedBox(height: 30),
                 Text(
                   "Design and Development",
                   style: AppTextStyles.title02
-                      .copyWith(fontWeight: FontWeight.w700),
+                      .copyWith(fontWeight: FontWeight.w400, fontSize: 17),
                 ),
                 const SizedBox(height: 25),
                 Row(
@@ -50,16 +51,16 @@ class InfoScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text("by DTT",
-                            style: AppTextStyles.body
-                                .copyWith(fontWeight: FontWeight.w400)),
+                            style: AppTextStyles.body.copyWith(
+                                fontWeight: FontWeight.w300,
+                                color: AppColors.textStrong)),
                         GestureDetector(
                           onTap: _launchUrl,
                           child: Text(
                             "d-tt.nl",
                             style: AppTextStyles.body.copyWith(
-                                color: AppColors.primaryRed,
-                                decoration: TextDecoration.underline,
-                                fontWeight: FontWeight.w400),
+                                color: Colors.blue,
+                                fontWeight: FontWeight.w300),
                           ),
                         ),
                       ],
