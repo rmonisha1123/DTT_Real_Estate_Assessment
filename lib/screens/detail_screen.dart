@@ -116,61 +116,70 @@ class _DetailScreenState extends State<DetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              formatPrice(widget.house.price),
-                              style: AppTextStyles.title01,
-                            ),
-                            Row(
-                              children: [
-                                _iconWithText("assets/Icons/ic_bed.svg",
-                                    "${widget.house.bedrooms}"),
-                                const SizedBox(width: 23),
-                                _iconWithText("assets/Icons/ic_bath.svg",
-                                    "${widget.house.bathrooms}"),
-                                const SizedBox(width: 23),
-                                _iconWithText("assets/Icons/ic_layers.svg",
-                                    "${widget.house.size}"),
-                                const SizedBox(width: 23),
-                                _iconWithText(
-                                  "assets/Icons/ic_location.svg",
-                                  distanceKm != null
-                                      ? "${distanceKm!.toStringAsFixed(1)} km"
-                                      : "-",
-                                ),
-                              ],
-                            )
-                          ],
+                        Padding(
+                          padding: const EdgeInsets.only(top: 20.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                formatPrice(widget.house.price),
+                                style: AppTextStyles.title01,
+                              ),
+                              Row(
+                                children: [
+                                  _iconWithText("assets/Icons/ic_bed.svg",
+                                      "${widget.house.bedrooms}"),
+                                  const SizedBox(width: 23),
+                                  _iconWithText("assets/Icons/ic_bath.svg",
+                                      "${widget.house.bathrooms}"),
+                                  const SizedBox(width: 23),
+                                  _iconWithText("assets/Icons/ic_layers.svg",
+                                      "${widget.house.size}"),
+                                  const SizedBox(width: 23),
+                                  _iconWithText(
+                                    "assets/Icons/ic_location.svg",
+                                    distanceKm != null
+                                        ? "${distanceKm!.toStringAsFixed(1)} km"
+                                        : "-",
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 6),
+                        // const SizedBox(height: 6),
                         // Text(
                         //   "${house.postalCode}${house.city}",
                         //   style: AppTextStyles.body,
                         // ),
-                        const SizedBox(height: 12),
+                        // const SizedBox(height: 12),
 
                         // Icons Row
 
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 25),
 
                         Text("Description",
-                            style: AppTextStyles.title02
-                                .copyWith(fontWeight: FontWeight.w700)),
-                        const SizedBox(height: 6),
+                            style: AppTextStyles.title02.copyWith(
+                                fontWeight: FontWeight.w500, fontSize: 17)),
+                        const SizedBox(height: 20),
                         Text(
                           widget.house.description ??
                               "No description available.",
                           style: AppTextStyles.body
-                              .copyWith(fontWeight: FontWeight.w400),
+                              .copyWith(fontWeight: FontWeight.w300),
                         ),
                         const SizedBox(height: 24),
+                        Text(
+                          widget.house.description ??
+                              "No description available.",
+                          style: AppTextStyles.body
+                              .copyWith(fontWeight: FontWeight.w300),
+                        ),
 
                         Text("Location",
-                            style: AppTextStyles.title02
-                                .copyWith(fontWeight: FontWeight.w700)),
-                        const SizedBox(height: 12),
+                            style: AppTextStyles.title02.copyWith(
+                                fontWeight: FontWeight.w500, fontSize: 17)),
+                        const SizedBox(height: 15),
 
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
