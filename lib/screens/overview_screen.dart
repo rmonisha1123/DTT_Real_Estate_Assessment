@@ -338,69 +338,82 @@ class _OverviewScreenState extends State<OverviewScreen>
     ];
 
     return Scaffold(
-      body: Stack(
-        children: [
-          SlideTransition(
-            position: _backgroundParallax,
-            child: Container(
-              color: _selectedIndex == 0 ? Colors.white : Colors.grey.shade100,
+        body: Stack(
+          children: [
+            SlideTransition(
+              position: _backgroundParallax,
+              child: Container(
+                color:
+                    _selectedIndex == 0 ? Colors.white : Colors.grey.shade100,
+              ),
             ),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 450),
+              child: pages[_selectedIndex],
+            ),
+          ],
+        ),
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05), // subtle shadow
+                blurRadius: 20,
+                offset: const Offset(0, -4), // shadow upwards
+              ),
+            ],
           ),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 450),
-            child: pages[_selectedIndex],
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        selectedItemColor: AppColors.primaryRed,
-        unselectedItemColor: AppColors.textMedium,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        onTap: (index) {
-          // Prevent tapping wishlist if offline
-          if (_isOffline && index == 2) return;
+          child: BottomNavigationBar(
+            elevation: 0, // remove default shadow
+            backgroundColor: Colors.transparent, // use container bg instead
+            currentIndex: _selectedIndex,
+            selectedItemColor: AppColors.primaryRed,
+            unselectedItemColor: AppColors.textMedium,
+            showSelectedLabels: false,
+            showUnselectedLabels: false,
+            onTap: (index) {
+              if (_isOffline && index == 2) return;
 
-          if (index != _selectedIndex) {
-            if (index == 1 || index == 2) {
-              _transitionController.forward(from: 0);
-            } else {
-              _transitionController.reverse(from: 1);
-            }
-            setState(() => _selectedIndex = index);
-          }
-        },
-        items: [
-          BottomNavigationBarItem(
-            icon: SvgPicture.asset(
-              'assets/Icons/ic_home.svg',
-              width: 20, // ✅ control width
-              height: 20, // ✅ control height
-              color: _selectedIndex == 0
-                  ? AppColors.primaryRed
-                  : AppColors.textMedium,
-            ),
-            label: "",
+              if (index != _selectedIndex) {
+                if (index == 1 || index == 2) {
+                  _transitionController.forward(from: 0);
+                } else {
+                  _transitionController.reverse(from: 1);
+                }
+                setState(() => _selectedIndex = index);
+              }
+            },
+            items: [
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset(
+                  'assets/Icons/ic_home.svg',
+                  width: 20,
+                  height: 20,
+                  color: _selectedIndex == 0
+                      ? AppColors.primaryRed
+                      : AppColors.textMedium,
+                ),
+                label: "",
+              ),
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset(
+                  'assets/Icons/ic_info.svg',
+                  width: 20,
+                  height: 20,
+                  color: _selectedIndex == 1
+                      ? AppColors.primaryRed
+                      : AppColors.textMedium,
+                ),
+                label: "",
+              ),
+              if (!_isOffline)
+                const BottomNavigationBarItem(
+                  icon: Icon(Icons.favorite_outline),
+                  label: "",
+                ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: SvgPicture.asset(
-              'assets/Icons/ic_info.svg',
-              width: 20, // ✅ control width
-              height: 20, // ✅ control height
-              color: _selectedIndex == 1
-                  ? AppColors.primaryRed
-                  : AppColors.textMedium,
-            ),
-            label: "",
-          ),
-          if (!_isOffline)
-            const BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_outline),
-              label: "",
-            ),
-        ],
-      ),
-    );
+        ));
   }
 }
