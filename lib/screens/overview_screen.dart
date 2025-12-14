@@ -131,6 +131,9 @@ class _OverviewScreenState extends State<OverviewScreen>
       final houses = await api.fetchHouses();
       final position = await LocationHelper.getUserLocation();
 
+      // ⭐ Sort by price (lowest first)
+      houses.sort((a, b) => a.price.compareTo(b.price));
+
       setState(() {
         _houses = houses;
         _filteredHouses = houses;
@@ -154,10 +157,13 @@ class _OverviewScreenState extends State<OverviewScreen>
       _filteredHouses = query.isEmpty
           ? _houses
           : _houses.where((house) {
-              final cityMatch = house.city.toLowerCase().contains(query);
-              final postalMatch =
-                  house.postalCode.toLowerCase().contains(query);
-              return cityMatch || postalMatch;
+              final city = house.city.toLowerCase();
+              final postal = house.postalCode.toLowerCase();
+              final combined = "$postal $city";
+
+              return city.contains(query) ||
+                  postal.contains(query) ||
+                  combined.contains(query); // ⭐ Match combined search
             }).toList();
     });
   }
