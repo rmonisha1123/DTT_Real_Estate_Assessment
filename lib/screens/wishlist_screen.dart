@@ -12,6 +12,9 @@ import 'detail_screen.dart';
 ///
 /// This screen is only available when the device is online and allows
 /// users to view and manage their favorite properties.
+/// This widget is Stateful to allow future integration
+/// with state management solutions (e.g. flutter_bloc)
+/// without requiring structural changes.
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
 
