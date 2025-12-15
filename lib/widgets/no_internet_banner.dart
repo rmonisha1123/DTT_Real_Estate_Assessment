@@ -1,7 +1,10 @@
-// lib/widgets/no_internet_banner.dart
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
+/// Banner displayed when the device is offline.
+///
+/// Informs the user about connectivity issues and prevents actions
+/// that require an active internet connection.
 class NoInternetBanner extends StatelessWidget {
   const NoInternetBanner({super.key});
 

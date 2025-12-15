@@ -7,6 +7,10 @@ import '../models/house.dart';
 import '../theme/app_theme.dart';
 import '../utils/price_formatter.dart';
 
+/// Card widget used to display a house preview in the overview list.
+///
+/// Shows the house image, price, location, and distance information
+/// and acts as a tappable entry point to the detail screen.
 class HouseCard extends StatefulWidget {
   final House house;
   final VoidCallback? onTap;
@@ -32,7 +36,7 @@ class _HouseCardState extends State<HouseCard> {
     _loadFavoriteStatus();
   }
 
-  // ✅ Load favorite status from SharedPreferences
+  // Load favorite status from SharedPreferences
   Future<void> _loadFavoriteStatus() async {
     final prefs = await SharedPreferences.getInstance();
     final favoritesJson = prefs.getStringList('wishlist') ?? [];
@@ -47,7 +51,7 @@ class _HouseCardState extends State<HouseCard> {
     });
   }
 
-  // ✅ Toggle favorite status and persist to SharedPreferences
+  // Toggle favorite status and persist to SharedPreferences
   Future<void> _toggleFavorite() async {
     final prefs = await SharedPreferences.getInstance();
     final favoritesJson = prefs.getStringList('wishlist') ?? [];
@@ -84,7 +88,7 @@ class _HouseCardState extends State<HouseCard> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 🏠 House image with favorite icon overlay
+              // House image with favorite icon overlay
               Stack(
                 children: [
                   ClipRRect(
@@ -156,7 +160,7 @@ class _HouseCardState extends State<HouseCard> {
     );
   }
 
-  // 🔧 Helper widget to combine SVG icon and text neatly
+  // Helper widget to combine SVG icon and text neatly
   Widget _iconWithText(String assetPath, String text) {
     return Row(
       children: [

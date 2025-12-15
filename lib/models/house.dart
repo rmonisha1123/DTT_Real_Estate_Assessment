@@ -1,4 +1,7 @@
-// lib/models/house.dart
+/// Data model representing a house listing.
+///
+/// Contains property details such as price, location, size,
+/// and descriptive information retrieved from the API.
 class House {
   final int id;
   final String title;
@@ -37,9 +40,7 @@ class House {
       imagePath: json['image'] ?? '',
       price: double.tryParse(json['price'].toString()) ?? 0.0,
       city: json['city'] ?? '',
-      postalCode: (json['zip'] ?? '')
-          .toString()
-          .replaceAll(' ', ''), // remove space like 1032KH
+      postalCode: (json['zip'] ?? '').toString().replaceAll(' ', ''),
       bedrooms: json['bedrooms'] ?? 0,
       bathrooms: json['bathrooms'] ?? 0,
       size: json['size'] ?? 0,
@@ -52,7 +53,6 @@ class House {
     );
   }
 
-  // ✅ For copying existing house with a new distance
   House copyWith({double? distance}) {
     return House(
       id: id,
@@ -71,7 +71,7 @@ class House {
     );
   }
 
-  // ✅ For saving to SharedPreferences
+  // For saving to SharedPreferences
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -90,9 +90,9 @@ class House {
     };
   }
 
-  // ✅ For restoring from SharedPreferences (alias for fromJson)
+  // For restoring from SharedPreferences (alias for fromJson)
   static House fromMap(Map<String, dynamic> map) => House.fromJson(map);
 
-  // ✅ Full image URL getter
+  // Full image URL getter
   String get imageUrl => 'https://intern.d-tt.nl$imagePath';
 }

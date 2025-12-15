@@ -8,6 +8,10 @@ import '../theme/app_theme.dart';
 import '../utils/location_helper.dart';
 import '../utils/price_formatter.dart';
 
+/// Displays detailed information about a selected house.
+///
+/// Shows the house image, price, features, description, and location.
+/// The header image remains fixed while the content scrolls.
 class DetailScreen extends StatefulWidget {
   final House house;
 
@@ -17,22 +21,22 @@ class DetailScreen extends StatefulWidget {
   State<DetailScreen> createState() => _DetailScreenState();
 }
 
+/// State class for [DetailScreen].
+///
+/// Calculates distance from the user's location and manages
+/// scrolling behavior and map interactions.
 class _DetailScreenState extends State<DetailScreen> {
   double? distanceKm;
   Position? _userPosition;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _initData();
   }
 
   Future<void> _initData() async {
-    // setState(() => _loading = true);
-
     try {
-      // final houses = await api.fetchHouses();
       final position = await LocationHelper.getUserLocation();
 
       setState(() {
@@ -50,12 +54,9 @@ class _DetailScreenState extends State<DetailScreen> {
       } else {
         print("ELSE");
       }
-    } catch (e) {
-      // setState(() => _loading = false);
-    }
+    } catch (e) {}
   }
 
-  // Open Google Maps when tapped
   Future<void> _openMaps(double lat, double lng) async {
     final Uri googleMapsUrl =
         Uri.parse("https://www.google.com/maps/search/?api=1&query=$lat,$lng");
@@ -100,7 +101,7 @@ class _DetailScreenState extends State<DetailScreen> {
 
           // ---------- SCROLLABLE CONTENT ----------
           Positioned(
-            top: 215, // where white container starts
+            top: 215,
             left: 0,
             right: 0,
             bottom: 0,
@@ -213,7 +214,6 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-// 🔧 Helper widget to combine SVG icon and text neatly
   Widget _iconWithText(String assetPath, String text) {
     return Row(
       children: [

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-// import '../theme/app_theme.dart';
 
+/// Loading placeholder for a house card.
+///
+/// Shown while house data is being fetched from the API to indicate
+/// that content is loading and maintain layout consistency.
 class HouseCardShimmer extends StatelessWidget {
   const HouseCardShimmer({super.key});
 

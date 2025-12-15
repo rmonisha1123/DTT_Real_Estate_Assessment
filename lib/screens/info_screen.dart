@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
 
+/// Displays static informational content about the application.
+///
+/// Contains branding details, external links, and descriptive text
+/// presented according to the design guidelines.
 class InfoScreen extends StatelessWidget {
-  final bool isOffline; // 👈 new flag to detect offline state
+  final bool isOffline;
   final Uri _url = Uri.parse('http://www.d-tt.nl/');
 
   InfoScreen({super.key, this.isOffline = false});
@@ -22,7 +26,6 @@ class InfoScreen extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          // 👇 Main Info Content
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ListView(
@@ -68,7 +71,7 @@ class InfoScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 40),
-                // 👇 Small note if offline
+                // Small note if offline
                 if (isOffline)
                   Column(
                     children: [
@@ -89,7 +92,7 @@ class InfoScreen extends StatelessWidget {
             ),
           ),
 
-          // 👇 Floating offline banner (same as other screens)
+          // Floating offline banner (same as other screens)
           if (isOffline)
             Positioned(
               top: 0,
