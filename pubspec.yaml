@@ -42,6 +42,8 @@ dependencies:
   flutter_svg: ^2.2.0
   shared_preferences: ^2.5.3
   connectivity_plus: ^7.0.0
+  flutter_native_splash: ^2.4.7
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
@@ -56,6 +58,14 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+flutter_native_splash:
+  color: "#E65541"
+  image: assets/Images/launcher_icon.png
+  android: true
+  ios: true
+  web: true
+  android_gravity: center
+  ios_content_mode: scaleAspectFill
 
 # The following section is specific to Flutter packages.
 flutter:

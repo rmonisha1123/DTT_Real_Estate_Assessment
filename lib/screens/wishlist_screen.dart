@@ -8,6 +8,13 @@ import '../widgets/empty_state.dart';
 import '../theme/app_theme.dart';
 import 'detail_screen.dart';
 
+/// Displays the user's saved houses.
+///
+/// This screen is only available when the device is online and allows
+/// users to view and manage their favorite properties.
+/// This widget is Stateful to allow future integration
+/// with state management solutions (e.g. flutter_bloc)
+/// without requiring structural changes.
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
 
@@ -54,7 +61,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
         centerTitle: false,
         title: Text(
           "WISHLIST",
-          style: AppTextStyles.title01.copyWith(color: AppColors.textStrong),
+          style: AppTextStyles.title01.copyWith(
+              color: AppColors.textStrong, fontWeight: FontWeight.w700),
         ),
       ),
       body: _loading
@@ -68,8 +76,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     itemBuilder: (context, index) {
                       final house = _wishlist[index];
                       return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
+                        onTap: () async {
+                          await Navigator.push(
                             context,
                             PageRouteBuilder(
                               transitionDuration:
@@ -85,12 +93,21 @@ class _WishlistScreenState extends State<WishlistScreen> {
                               ),
                             ),
                           );
+
+                          // ✅ Refresh wishlist after returning
+                          _loadWishlist();
                         },
                         child: Hero(
                           tag: 'house-image-${house.id}',
                           child: HouseCard(
                             house: house,
                             distance: house.distance,
+                            onRemovedFromWishlist: () {
+                              setState(() {
+                                _wishlist
+                                    .removeWhere((item) => item.id == house.id);
+                              });
+                            },
                           ),
                         ),
                       );

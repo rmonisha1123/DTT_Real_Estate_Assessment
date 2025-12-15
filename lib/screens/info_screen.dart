@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
 
+/// Displays static informational content about the application.
+///
+/// Contains branding details, external links, and descriptive text
+/// presented according to the design guidelines.
 class InfoScreen extends StatelessWidget {
-  final bool isOffline; // 👈 new flag to detect offline state
+  final bool isOffline;
   final Uri _url = Uri.parse('http://www.d-tt.nl/');
 
   InfoScreen({super.key, this.isOffline = false});
@@ -15,25 +19,28 @@ class InfoScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           "ABOUT",
-          style: AppTextStyles.title01.copyWith(color: AppColors.white),
+          style: AppTextStyles.title01.copyWith(
+              color: AppColors.textStrong, fontWeight: FontWeight.w500),
         ),
-        backgroundColor: AppColors.primaryRed,
+        backgroundColor: AppColors.white,
       ),
       body: Stack(
         children: [
-          // 👇 Main Info Content
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ListView(
               children: [
                 Text(
                   "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariature. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incidididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.",
-                  style: AppTextStyles.body,
+                  style: AppTextStyles.body.copyWith(
+                    fontWeight: FontWeight.w300,
+                  ),
                 ),
                 const SizedBox(height: 30),
                 Text(
                   "Design and Development",
-                  style: AppTextStyles.title02,
+                  style: AppTextStyles.title02
+                      .copyWith(fontWeight: FontWeight.w400, fontSize: 17),
                 ),
                 const SizedBox(height: 25),
                 Row(
@@ -46,15 +53,17 @@ class InfoScreen extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("by DTT", style: AppTextStyles.body),
+                        Text("by DTT",
+                            style: AppTextStyles.body.copyWith(
+                                fontWeight: FontWeight.w300,
+                                color: AppColors.textStrong)),
                         GestureDetector(
                           onTap: _launchUrl,
                           child: Text(
                             "d-tt.nl",
                             style: AppTextStyles.body.copyWith(
-                              color: AppColors.primaryRed,
-                              decoration: TextDecoration.underline,
-                            ),
+                                color: Colors.blue,
+                                fontWeight: FontWeight.w300),
                           ),
                         ),
                       ],
@@ -62,7 +71,7 @@ class InfoScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 40),
-                // 👇 Small note if offline
+                // Small note if offline
                 if (isOffline)
                   Column(
                     children: [
@@ -83,7 +92,7 @@ class InfoScreen extends StatelessWidget {
             ),
           ),
 
-          // 👇 Floating offline banner (same as other screens)
+          // Floating offline banner (same as other screens)
           if (isOffline)
             Positioned(
               top: 0,

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:connectivity_plus/connectivity_plus.dart'; // 👈 Added for offline handling
+import 'package:connectivity_plus/connectivity_plus.dart';
 import '../models/house.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
+import '../utils/internet_helper.dart';
 import '../utils/location_helper.dart';
 import '../widgets/house_card.dart';
 import '../widgets/empty_state.dart';
@@ -13,6 +14,13 @@ import 'info_screen.dart';
 import 'detail_screen.dart';
 import 'wishlist_screen.dart';
 
+/// Main container screen of the application.
+///
+/// Hosts the bottom navigation bar and manages switching between
+/// the overview, info, and wishlist sections. Also handles data
+/// loading, search, sorting, and offline states.
+/// This widget is Stateful to support future state management
+/// integration (e.g. flutter_bloc) without major refactoring.
 class OverviewScreen extends StatefulWidget {
   const OverviewScreen({super.key});
 
@@ -20,6 +28,10 @@ class OverviewScreen extends StatefulWidget {
   State<OverviewScreen> createState() => _OverviewScreenState();
 }
 
+/// State class for [OverviewScreen].
+///
+/// Responsible for fetching house data, handling search and sorting,
+/// tracking connectivity changes, and managing navigation animations.
 class _OverviewScreenState extends State<OverviewScreen>
     with TickerProviderStateMixin {
   int _selectedIndex = 0;
@@ -27,14 +39,13 @@ class _OverviewScreenState extends State<OverviewScreen>
   List<House> _houses = [];
   List<House> _filteredHouses = [];
   bool _loading = true;
-  bool _isOffline = false; // 👈 Track internet status
+  bool _isOffline = false;
 
   final TextEditingController _searchController = TextEditingController();
   Position? _userPosition;
 
   late final Connectivity _connectivity;
 
-  // Animation controllers
   late final AnimationController _transitionController;
   late final Animation<Offset> _slideAnimation;
   late final Animation<double> _fadeAnimation;
@@ -44,10 +55,9 @@ class _OverviewScreenState extends State<OverviewScreen>
   @override
   void initState() {
     super.initState();
-    _initConnectivityListener(); // 👈 Start internet monitoring
+    _initConnectivityListener();
     _initData();
 
-    // Main animation controller for transitions
     _transitionController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 450),
@@ -75,7 +85,6 @@ class _OverviewScreenState extends State<OverviewScreen>
       ),
     );
 
-    // Parallax background animation
     _backgroundParallax = Tween<Offset>(
       begin: const Offset(0.05, 0),
       end: Offset.zero,
@@ -93,43 +102,50 @@ class _OverviewScreenState extends State<OverviewScreen>
     super.dispose();
   }
 
-  /// 🔌 Connectivity listener setup
-  void _initConnectivityListener() {
+  void _initConnectivityListener() async {
     _connectivity = Connectivity();
-    _connectivity.onConnectivityChanged.listen((status) {
-      final connected = status != ConnectivityResult.none;
-      if (!connected) {
+
+    // 🔹 Initial internet validation (important on app start)
+    final hasInternet = await InternetHelper.hasInternet();
+    setState(() => _isOffline = !hasInternet);
+
+    _connectivity.onConnectivityChanged.listen((_) async {
+      final hasInternet = await InternetHelper.hasInternet();
+
+      // Went offline
+      if (!hasInternet && !_isOffline) {
         setState(() => _isOffline = true);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("⚠️ No internet connection"),
             backgroundColor: Colors.redAccent,
-            duration: Duration(seconds: 3),
           ),
         );
-      } else {
-        if (_isOffline) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("✅ Back online — refreshing data..."),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
-            ),
-          );
-          _initData();
-        }
+      }
+
+      // Came back online
+      if (hasInternet && _isOffline) {
         setState(() => _isOffline = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("✅ Back online — refreshing data..."),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _initData();
       }
     });
   }
 
-  /// 🔁 Fetch data from API (when online)
+  /// Fetch data from API (when online)
   Future<void> _initData() async {
     setState(() => _loading = true);
 
     try {
       final houses = await api.fetchHouses();
       final position = await LocationHelper.getUserLocation();
+
+      houses.sort((a, b) => a.price.compareTo(b.price));
 
       setState(() {
         _houses = houses;
@@ -138,7 +154,6 @@ class _OverviewScreenState extends State<OverviewScreen>
         _loading = false;
       });
     } catch (e) {
-      // If API fails (offline or other)
       setState(() {
         _loading = false;
         _isOffline = true;
@@ -146,7 +161,8 @@ class _OverviewScreenState extends State<OverviewScreen>
     }
   }
 
-  /// 🔍 Filter houses by search query
+  /// Filters houses locally for fast UI feedback.
+  /// Asynchronous search can be introduced if backend search is required.
   void _filterHouses(String query) {
     query = query.toLowerCase().trim();
 
@@ -154,15 +170,18 @@ class _OverviewScreenState extends State<OverviewScreen>
       _filteredHouses = query.isEmpty
           ? _houses
           : _houses.where((house) {
-              final cityMatch = house.city.toLowerCase().contains(query);
-              final postalMatch =
-                  house.postalCode.toLowerCase().contains(query);
-              return cityMatch || postalMatch;
+              final city = house.city.toLowerCase();
+              final postal = house.postalCode.toLowerCase();
+              final combined = "$postal $city";
+
+              return city.contains(query) ||
+                  postal.contains(query) ||
+                  combined.contains(query);
             }).toList();
     });
   }
 
-  /// 🏡 Overview Page (shows empty state when offline)
+  /// Overview Page (shows empty state when offline)
   Widget _buildOverviewPage() {
     if (_isOffline) {
       return const EmptyState(
@@ -178,7 +197,8 @@ class _OverviewScreenState extends State<OverviewScreen>
         centerTitle: false,
         title: Text(
           "DTT REAL ESTATE",
-          style: AppTextStyles.title01.copyWith(color: AppColors.textStrong),
+          style: AppTextStyles.title01.copyWith(
+              color: AppColors.textStrong, fontWeight: FontWeight.w700),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
@@ -186,23 +206,34 @@ class _OverviewScreenState extends State<OverviewScreen>
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: TextField(
               controller: _searchController,
-              onChanged: _filterHouses,
+              onChanged: (value) {
+                _filterHouses(value);
+                setState(() {});
+              },
               decoration: InputDecoration(
                 hintText: "Search for a home",
                 labelStyle: AppTextStyles.input,
                 hintStyle: AppTextStyles.hint,
-                suffixIcon: Padding(
-                  padding:
-                      const EdgeInsets.all(12.0), // Adjust padding as needed
-                  child: SvgPicture.asset(
-                    'assets/Icons/ic_search.svg',
-                    width: 20, // ✅ control width
-                    height: 20, // ✅ control height
-                    color: AppColors.textMedium,
-                  ),
-                ),
                 filled: true,
                 fillColor: AppColors.lightGray,
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(Icons.clear, color: AppColors.textMedium),
+                        onPressed: () {
+                          _searchController.clear();
+                          _filterHouses("");
+                          setState(() {});
+                        },
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: SvgPicture.asset(
+                          'assets/Icons/ic_search.svg',
+                          width: 20,
+                          height: 20,
+                          color: AppColors.textMedium,
+                        ),
+                      ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -219,7 +250,7 @@ class _OverviewScreenState extends State<OverviewScreen>
             )
           : _filteredHouses.isEmpty
               ? const EmptyState(
-                  message: "No results found! Try another search.")
+                  message: "No results found!\nPerhaps try another search?")
               : ListView.builder(
                   itemCount: _filteredHouses.length,
                   itemBuilder: (context, index) {
@@ -249,7 +280,6 @@ class _OverviewScreenState extends State<OverviewScreen>
                             pageBuilder: (_, animation, __) =>
                                 DetailScreen(house: house),
                             transitionsBuilder: (_, animation, __, child) {
-                              // Combine fade + slide + scale
                               final slideAnimation = Tween<Offset>(
                                 begin: const Offset(0.1, 0.05),
                                 end: Offset.zero,
@@ -302,7 +332,6 @@ class _OverviewScreenState extends State<OverviewScreen>
     );
   }
 
-  /// ℹ️ Info Page (always available)
   Widget _buildInfoPage() {
     return SlideTransition(
       position: _slideAnimation,
@@ -321,73 +350,89 @@ class _OverviewScreenState extends State<OverviewScreen>
     final pages = [
       _buildOverviewPage(),
       _buildInfoPage(),
-      if (!_isOffline) const WishlistScreen(), // 👈 Hide wishlist when offline
+      if (!_isOffline) const WishlistScreen(),
     ];
 
     return Scaffold(
-      body: Stack(
-        children: [
-          SlideTransition(
-            position: _backgroundParallax,
-            child: Container(
-              color: _selectedIndex == 0 ? Colors.white : Colors.grey.shade100,
+        body: Stack(
+          children: [
+            SlideTransition(
+              position: _backgroundParallax,
+              child: Container(
+                color:
+                    _selectedIndex == 0 ? Colors.white : Colors.grey.shade100,
+              ),
             ),
-          ),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 450),
-            child: pages[_selectedIndex],
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        selectedItemColor: AppColors.primaryRed,
-        unselectedItemColor: AppColors.textMedium,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        onTap: (index) {
-          // Prevent tapping wishlist if offline
-          if (_isOffline && index == 2) return;
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 450),
+              child: pages[_selectedIndex],
+            ),
+          ],
+        ),
 
-          if (index != _selectedIndex) {
-            if (index == 1 || index == 2) {
-              _transitionController.forward(from: 0);
-            } else {
-              _transitionController.reverse(from: 1);
-            }
-            setState(() => _selectedIndex = index);
-          }
-        },
-        items: [
-          BottomNavigationBarItem(
-            icon: SvgPicture.asset(
-              'assets/Icons/ic_home.svg',
-              width: 20, // ✅ control width
-              height: 20, // ✅ control height
-              color: _selectedIndex == 0
-                  ? AppColors.primaryRed
-                  : AppColors.textMedium,
-            ),
-            label: "",
+        /// Bottom navigation uses animated transitions instead of
+        /// route navigation to preserve screen state and improve UX.
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 20,
+                offset: const Offset(0, -4),
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: SvgPicture.asset(
-              'assets/Icons/ic_info.svg',
-              width: 20, // ✅ control width
-              height: 20, // ✅ control height
-              color: _selectedIndex == 1
-                  ? AppColors.primaryRed
-                  : AppColors.textMedium,
-            ),
-            label: "",
+          child: BottomNavigationBar(
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            currentIndex: _selectedIndex,
+            selectedItemColor: AppColors.primaryRed,
+            unselectedItemColor: AppColors.textMedium,
+            showSelectedLabels: false,
+            showUnselectedLabels: false,
+            onTap: (index) {
+              if (_isOffline && index == 2) return;
+
+              if (index != _selectedIndex) {
+                if (index == 1 || index == 2) {
+                  _transitionController.forward(from: 0);
+                } else {
+                  _transitionController.reverse(from: 1);
+                }
+                setState(() => _selectedIndex = index);
+              }
+            },
+            items: [
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset(
+                  'assets/Icons/ic_home.svg',
+                  width: 20,
+                  height: 20,
+                  color: _selectedIndex == 0
+                      ? AppColors.primaryRed
+                      : AppColors.textMedium,
+                ),
+                label: "",
+              ),
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset(
+                  'assets/Icons/ic_info.svg',
+                  width: 20,
+                  height: 20,
+                  color: _selectedIndex == 1
+                      ? AppColors.primaryRed
+                      : AppColors.textMedium,
+                ),
+                label: "",
+              ),
+              if (!_isOffline)
+                const BottomNavigationBarItem(
+                  icon: Icon(Icons.favorite_outline),
+                  label: "",
+                ),
+            ],
           ),
-          if (!_isOffline)
-            const BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_outline),
-              label: "",
-            ),
-        ],
-      ),
-    );
+        ));
   }
 }

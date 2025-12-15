@@ -1,21 +1,33 @@
 // lib/widgets/house_card.dart
 import 'dart:convert';
+import 'package:dtt_real_estate_assessment/widgets/icon_with_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/house.dart';
 import '../theme/app_theme.dart';
+import '../utils/price_formatter.dart';
 
+/// Card widget used to display a house preview in the overview list.
+///
+/// Shows the house image, price, location, and distance information
+/// and acts as a tappable entry point to the detail screen.
+/// Implemented as a StatefulWidget to support future
+/// interactive features and state management.
 class HouseCard extends StatefulWidget {
   final House house;
   final VoidCallback? onTap;
   final double? distance;
+
+  /// Called when the house is removed from wishlist.
+  /// Used by WishlistScreen to update the list immediately.
+  final VoidCallback? onRemovedFromWishlist;
 
   const HouseCard({
     super.key,
     required this.house,
     this.onTap,
     this.distance,
+    this.onRemovedFromWishlist,
   });
 
   @override
@@ -31,7 +43,7 @@ class _HouseCardState extends State<HouseCard> {
     _loadFavoriteStatus();
   }
 
-  // ✅ Load favorite status from SharedPreferences
+  /// Loads the favorite status from local storage.
   Future<void> _loadFavoriteStatus() async {
     final prefs = await SharedPreferences.getInstance();
     final favoritesJson = prefs.getStringList('wishlist') ?? [];
@@ -46,7 +58,10 @@ class _HouseCardState extends State<HouseCard> {
     });
   }
 
-  // ✅ Toggle favorite status and persist to SharedPreferences
+  /// Toggles favorite status and persists the change.
+  ///
+  /// When removing from wishlist, notifies the parent
+  /// so the UI updates immediately.
   Future<void> _toggleFavorite() async {
     final prefs = await SharedPreferences.getInstance();
     final favoritesJson = prefs.getStringList('wishlist') ?? [];
@@ -57,12 +72,16 @@ class _HouseCardState extends State<HouseCard> {
         final data = jsonDecode(item);
         return data['id'] == widget.house.id;
       });
+
+      await prefs.setStringList('wishlist', favoritesJson);
+
+      // ✅ Notify parent (WishlistScreen)
+      widget.onRemovedFromWishlist?.call();
     } else {
       // Add to wishlist
       favoritesJson.add(jsonEncode(widget.house.toJson()));
+      await prefs.setStringList('wishlist', favoritesJson);
     }
-
-    await prefs.setStringList('wishlist', favoritesJson);
 
     setState(() {
       _isFavorite = !_isFavorite;
@@ -83,7 +102,6 @@ class _HouseCardState extends State<HouseCard> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 🏠 House image with favorite icon overlay
               Stack(
                 children: [
                   ClipRRect(
@@ -117,28 +135,35 @@ class _HouseCardState extends State<HouseCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "\$${widget.house.price.toStringAsFixed(0)}",
+                      formatPrice(widget.house.price),
                       style: AppTextStyles.title02,
                     ),
                     Text(
                       "${widget.house.postalCode} ${widget.house.city}",
-                      style: AppTextStyles.body,
+                      style: AppTextStyles.body
+                          .copyWith(fontWeight: FontWeight.w400),
                     ),
                     const SizedBox(height: 25),
                     Row(
                       children: [
-                        _iconWithText("assets/Icons/ic_bed.svg",
-                            "${widget.house.bedrooms}"),
+                        IconWithText(
+                          iconPath: "assets/Icons/ic_bed.svg",
+                          text: "${widget.house.bedrooms}",
+                        ),
                         const SizedBox(width: 23),
-                        _iconWithText("assets/Icons/ic_bath.svg",
-                            "${widget.house.bathrooms}"),
+                        IconWithText(
+                          iconPath: "assets/Icons/ic_bath.svg",
+                          text: "${widget.house.bathrooms}",
+                        ),
                         const SizedBox(width: 23),
-                        _iconWithText("assets/Icons/ic_layers.svg",
-                            "${widget.house.size}"),
+                        IconWithText(
+                          iconPath: "assets/Icons/ic_layers.svg",
+                          text: "${widget.house.size}",
+                        ),
                         const SizedBox(width: 23),
-                        _iconWithText(
-                          "assets/Icons/ic_location.svg",
-                          widget.distance != null
+                        IconWithText(
+                          iconPath: "assets/Icons/ic_location.svg",
+                          text: widget.distance != null
                               ? "${widget.distance!.toStringAsFixed(1)} km"
                               : "-",
                         ),
@@ -151,28 +176,6 @@ class _HouseCardState extends State<HouseCard> {
           ),
         ),
       ),
-    );
-  }
-
-  // 🔧 Helper widget to combine SVG icon and text neatly
-  Widget _iconWithText(String assetPath, String text) {
-    return Row(
-      children: [
-        SvgPicture.asset(
-          assetPath,
-          width: 14,
-          height: 14,
-          colorFilter: const ColorFilter.mode(
-            AppColors.textMedium,
-            BlendMode.srcIn,
-          ),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          text,
-          style: AppTextStyles.detail.copyWith(color: AppColors.textMedium),
-        ),
-      ],
     );
   }
 }
