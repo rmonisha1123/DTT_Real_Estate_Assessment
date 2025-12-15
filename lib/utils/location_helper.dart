@@ -1,5 +1,9 @@
 import 'package:geolocator/geolocator.dart';
 
+/// Utility class for location-related operations.
+///
+/// Provides methods for retrieving the user's current location
+/// and calculating distances between two geographic coordinates.
 class LocationHelper {
   static Future<Position?> getUserLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();

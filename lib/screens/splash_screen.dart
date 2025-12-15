@@ -1,9 +1,13 @@
-// lib/screens/splash_screen.dart
 import 'dart:async';
 
 import 'package:dtt_real_estate_assessment/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
+/// Displays the launch splash screen.
+///
+/// This screen is shown briefly when the app starts and is responsible
+/// for transitioning the user to the overview screen once initialization
+/// is complete.
 class SplashScreen extends StatefulWidget {
   @override
   _SplashScreenState createState() => _SplashScreenState();
@@ -21,7 +25,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 900), // ✅ shorter & smoother
+      duration: Duration(milliseconds: 900),
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -34,7 +38,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    // ✅ Short display → acts as animated continuation of native splash
+    //  Short display → acts as animated continuation of native splash
     Timer(const Duration(milliseconds: 1200), () {
       Navigator.of(context).pushReplacementNamed('/overview');
     });
@@ -49,7 +53,6 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ✅ Match flutter_native_splash background
       backgroundColor: AppColors.primaryRed,
       body: Center(
         child: FadeTransition(

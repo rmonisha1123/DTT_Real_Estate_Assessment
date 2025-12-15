@@ -8,6 +8,10 @@ import '../widgets/empty_state.dart';
 import '../theme/app_theme.dart';
 import 'detail_screen.dart';
 
+/// Displays the user's saved houses.
+///
+/// This screen is only available when the device is online and allows
+/// users to view and manage their favorite properties.
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
 
