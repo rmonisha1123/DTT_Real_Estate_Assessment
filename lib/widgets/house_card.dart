@@ -2,7 +2,6 @@
 import 'dart:convert';
 import 'package:dtt_real_estate_assessment/widgets/icon_with_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/house.dart';
 import '../theme/app_theme.dart';
@@ -19,11 +18,16 @@ class HouseCard extends StatefulWidget {
   final VoidCallback? onTap;
   final double? distance;
 
+  /// Called when the house is removed from wishlist.
+  /// Used by WishlistScreen to update the list immediately.
+  final VoidCallback? onRemovedFromWishlist;
+
   const HouseCard({
     super.key,
     required this.house,
     this.onTap,
     this.distance,
+    this.onRemovedFromWishlist,
   });
 
   @override
@@ -39,7 +43,7 @@ class _HouseCardState extends State<HouseCard> {
     _loadFavoriteStatus();
   }
 
-  // Load favorite status from SharedPreferences
+  /// Loads the favorite status from local storage.
   Future<void> _loadFavoriteStatus() async {
     final prefs = await SharedPreferences.getInstance();
     final favoritesJson = prefs.getStringList('wishlist') ?? [];
@@ -54,7 +58,10 @@ class _HouseCardState extends State<HouseCard> {
     });
   }
 
-  // Toggle favorite status and persist to SharedPreferences
+  /// Toggles favorite status and persists the change.
+  ///
+  /// When removing from wishlist, notifies the parent
+  /// so the UI updates immediately.
   Future<void> _toggleFavorite() async {
     final prefs = await SharedPreferences.getInstance();
     final favoritesJson = prefs.getStringList('wishlist') ?? [];
@@ -65,12 +72,16 @@ class _HouseCardState extends State<HouseCard> {
         final data = jsonDecode(item);
         return data['id'] == widget.house.id;
       });
+
+      await prefs.setStringList('wishlist', favoritesJson);
+
+      // ✅ Notify parent (WishlistScreen)
+      widget.onRemovedFromWishlist?.call();
     } else {
       // Add to wishlist
       favoritesJson.add(jsonEncode(widget.house.toJson()));
+      await prefs.setStringList('wishlist', favoritesJson);
     }
-
-    await prefs.setStringList('wishlist', favoritesJson);
 
     setState(() {
       _isFavorite = !_isFavorite;
@@ -91,7 +102,6 @@ class _HouseCardState extends State<HouseCard> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // House image with favorite icon overlay
               Stack(
                 children: [
                   ClipRRect(
@@ -137,16 +147,19 @@ class _HouseCardState extends State<HouseCard> {
                     Row(
                       children: [
                         IconWithText(
-                            iconPath: "assets/Icons/ic_bed.svg",
-                            text: "${widget.house.bedrooms}"),
+                          iconPath: "assets/Icons/ic_bed.svg",
+                          text: "${widget.house.bedrooms}",
+                        ),
                         const SizedBox(width: 23),
                         IconWithText(
-                            iconPath: "assets/Icons/ic_bath.svg",
-                            text: "${widget.house.bathrooms}"),
+                          iconPath: "assets/Icons/ic_bath.svg",
+                          text: "${widget.house.bathrooms}",
+                        ),
                         const SizedBox(width: 23),
                         IconWithText(
-                            iconPath: "assets/Icons/ic_layers.svg",
-                            text: "${widget.house.size}"),
+                          iconPath: "assets/Icons/ic_layers.svg",
+                          text: "${widget.house.size}",
+                        ),
                         const SizedBox(width: 23),
                         IconWithText(
                           iconPath: "assets/Icons/ic_location.svg",
