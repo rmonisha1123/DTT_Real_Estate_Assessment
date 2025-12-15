@@ -5,6 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../models/house.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
+import '../utils/internet_helper.dart';
 import '../utils/location_helper.dart';
 import '../widgets/house_card.dart';
 import '../widgets/empty_state.dart';
@@ -101,31 +102,37 @@ class _OverviewScreenState extends State<OverviewScreen>
     super.dispose();
   }
 
-  void _initConnectivityListener() {
+  void _initConnectivityListener() async {
     _connectivity = Connectivity();
-    _connectivity.onConnectivityChanged.listen((status) {
-      final connected = status != ConnectivityResult.none;
-      if (!connected) {
+
+    // 🔹 Initial internet validation (important on app start)
+    final hasInternet = await InternetHelper.hasInternet();
+    setState(() => _isOffline = !hasInternet);
+
+    _connectivity.onConnectivityChanged.listen((_) async {
+      final hasInternet = await InternetHelper.hasInternet();
+
+      // Went offline
+      if (!hasInternet && !_isOffline) {
         setState(() => _isOffline = true);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("⚠️ No internet connection"),
             backgroundColor: Colors.redAccent,
-            duration: Duration(seconds: 3),
           ),
         );
-      } else {
-        if (_isOffline) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("✅ Back online — refreshing data..."),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
-            ),
-          );
-          _initData();
-        }
+      }
+
+      // Came back online
+      if (hasInternet && _isOffline) {
         setState(() => _isOffline = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("✅ Back online — refreshing data..."),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _initData();
       }
     });
   }
