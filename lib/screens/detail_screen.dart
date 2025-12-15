@@ -1,3 +1,4 @@
+import 'package:dtt_real_estate_assessment/widgets/icon_with_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geolocator/geolocator.dart';
@@ -12,6 +13,8 @@ import '../utils/price_formatter.dart';
 ///
 /// Shows the house image, price, features, description, and location.
 /// The header image remains fixed while the content scrolls.
+/// This widget is Stateful to allow future state management
+/// integration and handle asynchronous data such as location updates.
 class DetailScreen extends StatefulWidget {
   final House house;
 
@@ -128,18 +131,21 @@ class _DetailScreenState extends State<DetailScreen> {
                               style: AppTextStyles.title01),
                           Row(
                             children: [
-                              _iconWithText("assets/Icons/ic_bed.svg",
-                                  "${widget.house.bedrooms}"),
+                              IconWithText(
+                                  iconPath: "assets/Icons/ic_bed.svg",
+                                  text: "${widget.house.bedrooms}"),
                               const SizedBox(width: 23),
-                              _iconWithText("assets/Icons/ic_bath.svg",
-                                  "${widget.house.bathrooms}"),
+                              IconWithText(
+                                  iconPath: "assets/Icons/ic_bath.svg",
+                                  text: "${widget.house.bathrooms}"),
                               const SizedBox(width: 23),
-                              _iconWithText("assets/Icons/ic_layers.svg",
-                                  "${widget.house.size}"),
+                              IconWithText(
+                                  iconPath: "assets/Icons/ic_layers.svg",
+                                  text: "${widget.house.size}"),
                               const SizedBox(width: 23),
-                              _iconWithText(
-                                "assets/Icons/ic_location.svg",
-                                distanceKm != null
+                              IconWithText(
+                                iconPath: "assets/Icons/ic_location.svg",
+                                text: distanceKm != null
                                     ? "${distanceKm!.toStringAsFixed(1)} km"
                                     : "-",
                               ),
@@ -211,30 +217,6 @@ class _DetailScreenState extends State<DetailScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _iconWithText(String assetPath, String text) {
-    return Row(
-      children: [
-        SvgPicture.asset(
-          assetPath,
-          width: 16,
-          height: 16,
-          colorFilter: const ColorFilter.mode(
-            AppColors.textMedium,
-            BlendMode.srcIn,
-          ),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          text,
-          style: AppTextStyles.detail.copyWith(
-              color: AppColors.textMedium,
-              fontWeight: FontWeight.w400,
-              fontSize: 10),
-        ),
-      ],
     );
   }
 }

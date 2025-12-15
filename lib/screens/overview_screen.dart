@@ -18,6 +18,8 @@ import 'wishlist_screen.dart';
 /// Hosts the bottom navigation bar and manages switching between
 /// the overview, info, and wishlist sections. Also handles data
 /// loading, search, sorting, and offline states.
+/// This widget is Stateful to support future state management
+/// integration (e.g. flutter_bloc) without major refactoring.
 class OverviewScreen extends StatefulWidget {
   const OverviewScreen({super.key});
 
@@ -152,6 +154,8 @@ class _OverviewScreenState extends State<OverviewScreen>
     }
   }
 
+  /// Filters houses locally for fast UI feedback.
+  /// Asynchronous search can be introduced if backend search is required.
   void _filterHouses(String query) {
     query = query.toLowerCase().trim();
 
@@ -358,6 +362,9 @@ class _OverviewScreenState extends State<OverviewScreen>
             ),
           ],
         ),
+
+        /// Bottom navigation uses animated transitions instead of
+        /// route navigation to preserve screen state and improve UX.
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
             color: AppColors.white,
